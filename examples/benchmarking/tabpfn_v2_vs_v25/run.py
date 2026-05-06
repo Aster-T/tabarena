@@ -23,11 +23,10 @@ if __name__ == "__main__":
     tabarena_context = TabArenaContext()
     task_metadata = tabarena_context.task_metadata
 
-    # Smoke test: run 3 datasets x 1 fold first; then expand to full benchmark.
-    datasets = ["anneal", "credit-g", "diabetes"]
-    folds = [0]
-    # datasets = list(task_metadata["name"])
-    # folds = [0, 1, 2]
+    # Full TabArena benchmark: 51 datasets x 3 folds.
+    # For a quick smoke test, swap to: datasets = ["anneal", "credit-g", "diabetes"]; folds = [0]
+    datasets = list(task_metadata["name"])
+    folds = [0, 1, 2]
 
     methods = [
         AGModelBagExperiment(
@@ -62,6 +61,9 @@ if __name__ == "__main__":
     )
     end_to_end_results = end_to_end.to_results()
 
+    eval_dir.mkdir(parents=True, exist_ok=True)
+    end_to_end_results.model_results.to_csv(eval_dir / "model_results.csv", index=False)
+
     with pd.option_context("display.max_rows", None, "display.max_columns", None, "display.width", 1000):
         print(f"Results:\n{end_to_end_results.model_results.head(100)}")
 
@@ -71,5 +73,10 @@ if __name__ == "__main__":
         use_model_results=True,
         new_result_prefix="V2vs25_",
     )
+    leaderboard.to_csv(eval_dir / "leaderboard_raw.csv", index=False)
+
     leaderboard_website = format_leaderboard(df_leaderboard=leaderboard)
-    print(leaderboard_website.to_markdown(index=False))
+    leaderboard_website.to_csv(eval_dir / "leaderboard_website.csv", index=False)
+    leaderboard_md = leaderboard_website.to_markdown(index=False)
+    (eval_dir / "leaderboard_website.md").write_text(leaderboard_md, encoding="utf-8")
+    print(leaderboard_md)
