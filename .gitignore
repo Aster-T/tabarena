@@ -158,3 +158,6 @@ autogluon/
 /examples/**/*.zip
 
 /tmp_scripts/
+
+# claude
+.claude/

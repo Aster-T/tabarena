@@ -11,6 +11,10 @@ from tabarena.benchmark.models.ag.sap_rpt_oss.sap_rpt_oss_model import SAPRPTOSS
 from tabarena.benchmark.models.ag.tabdpt.tabdpt_model import TabDPTModel
 from tabarena.benchmark.models.ag.tabicl.tabicl_model import TabICLModel, TabICLv2Model
 from tabarena.benchmark.models.ag.tabm.tabm_model import TabMModel
+from tabarena.benchmark.models.ag.tabpfnv2.tabpfnv2_model import (
+    RealTabPFNv25Model_V2Limits,
+    TabPFNv2Model,
+)
 from tabarena.benchmark.models.ag.tabpfnv2_5.tabpfnv2_5_model import (
     RealTabPFNv25Model,
     TabPFNv26Model,
@@ -25,12 +29,14 @@ __all__ = [
     "PerpetualBoosterModel",
     "RealMLPModel",
     "RealTabPFNv25Model",
+    "RealTabPFNv25Model_V2Limits",
     "SAPRPTOSSModel",
     "TabDPTModel",
     "TabICLModel",
     "TabICLv2Model",
     "TabMModel",
     "TabPFNv26Model",
+    "TabPFNv2Model",
     "TabSTARModel",
     "XRFMModel",
 ]
