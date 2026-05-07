@@ -7,7 +7,7 @@ import pandas as pd
 
 from tabarena.benchmark.experiment import AGModelBagExperiment, ExperimentBatchRunner
 from tabarena.benchmark.models.ag import (
-    RealTabPFNv25Model_V2Limits,
+    RealTabPFNv25Model,
     TabPFNv2Model,
 )
 from tabarena.nips2025_utils.end_to_end import EndToEnd
@@ -23,10 +23,25 @@ if __name__ == "__main__":
     tabarena_context = TabArenaContext()
     task_metadata = tabarena_context.task_metadata
 
-    # Full TabArena benchmark: 51 datasets x 3 folds.
-    # For a quick smoke test, swap to: datasets = ["anneal", "credit-g", "diabetes"]; folds = [0]
-    datasets = list(task_metadata["name"])
+    # Pre-filter datasets to TabPFNv2's hard size limits (NeurIPS 2024 paper):
+    # rows <= 10000 (training), features <= 500, classes <= 10.
+    # AutoGluon enforces these via assertion (`ag.max_rows`), so submitting an
+    # oversize task crashes the runner. Filter both methods to the same subset
+    # to keep the comparison apples-to-apples.
+    #
+    # TabArena uses 3-fold CV, so train_size = 2/3 * NumberOfInstances.
+    # We require train_size <= 10_000, i.e. NumberOfInstances <= 14_000 (with margin).
+    is_regression = task_metadata["task_type"].str.contains("REGRESSION", na=False)
+    fits_v2 = (
+        (task_metadata["NumberOfInstances"] <= 14_000)
+        & (task_metadata["NumberOfFeatures"] <= 500)
+        & (is_regression | (task_metadata["NumberOfClasses"] <= 10))
+    )
+    datasets = task_metadata.loc[fits_v2, "name"].tolist()
     folds = [0, 1, 2]
+    print(f"Eligible (fits TabPFNv2 limits) datasets: {len(datasets)}/{len(task_metadata)}")
+    skipped = task_metadata.loc[~fits_v2, "name"].tolist()
+    print(f"Skipped: {skipped}")
 
     methods = [
         AGModelBagExperiment(
@@ -37,8 +52,8 @@ if __name__ == "__main__":
             time_limit=3600,
         ),
         AGModelBagExperiment(
-            name="TabPFNv25_V2Limits_BAG_L1",
-            model_cls=RealTabPFNv25Model_V2Limits,
+            name="TabPFNv25_BAG_L1",
+            model_cls=RealTabPFNv25Model,
             model_hyperparameters={},
             num_bag_folds=8,
             time_limit=3600,

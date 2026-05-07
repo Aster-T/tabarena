@@ -3,10 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from tabarena.benchmark.models.ag.tabpfnv2_5.tabpfnv2_5_model import (
-    RealTabPFNv25Model,
-    TabPFNModel,
-)
+from tabarena.benchmark.models.ag.tabpfnv2_5.tabpfnv2_5_model import TabPFNModel
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -67,29 +64,6 @@ class TabPFNv2Model(TabPFNModel):
 
         self.model.set_params(**params_to_set)
         self.model = self.model.fit(X=X, y=y)
-
-    def _get_default_auxiliary_params(self) -> dict:
-        default_auxiliary_params = super()._get_default_auxiliary_params()
-        default_auxiliary_params.update(
-            {
-                "max_rows": 10_000,
-                "max_features": 500,
-                "max_classes": 10,
-            }
-        )
-        return default_auxiliary_params
-
-
-class RealTabPFNv25Model_V2Limits(RealTabPFNv25Model):
-    """RealTabPFN-v2.5 with v2's size constraints.
-
-    Used to ensure apples-to-apples comparison: v2 and v2.5 are skipped on
-    the exact same set of (dataset, fold) tasks by AutoGluon, so neither
-    method can score on a task the other cannot run.
-    """
-
-    ag_key = "TA-REALTABPFN-V2.5-V2LIMITS"
-    ag_name = "TA-RealTabPFN-v2.5-v2limits"
 
     def _get_default_auxiliary_params(self) -> dict:
         default_auxiliary_params = super()._get_default_auxiliary_params()
